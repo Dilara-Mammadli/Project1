@@ -48,3 +48,61 @@ FROM employees e INNER JOIN departaments d ON e.dep_id=d.id;
 UPDATE employees SET position='NEZARETCI', salary=1500 WHERE id=4;
 UPDATE employees SET status='Passiv' WHERE id=2;
 SELECT * FROM employees;
+
+
+
+
+
+
+
+15.07.2026
+-- 1. Addım: Cədvəli yaradırıq
+CREATE TABLE Satislar (
+    satis_id INT PRIMARY KEY, 
+    mehsul_adi VARCHAR(50), 
+    miqdar INT, 
+    vahid_qiymeti DECIMAL(10,2), 
+    endirim_faizi DECIMAL(10,2)
+);
+
+-- 2. Addım: Məlumatları daxil edirik (Endirimləri 0.15 və 0.12 olaraq yazırıq)
+INSERT INTO Satislar (
+    satis_id, 
+    mehsul_adi, 
+    miqdar, 
+    vahid_qiymeti, 
+    endirim_faizi
+) VALUES
+ (1, 'TELEFON', 2, 1500.00, 0.15),
+ (2, 'LAPTOP',  5, 2000.00, 0.12);
+
+-- 3. Addım: Həm ana məlumatları, həm də ROUND ilə net məbləği hesablayıb gətiririk
+SELECT 
+    satis_id, 
+    mehsul_adi, 
+    miqdar, 
+    vahid_qiymeti, 
+    endirim_faizi,
+    ROUND((miqdar * vahid_qiymeti) * (1 - endirim_faizi), 2) AS net_mebleg
+FROM Satislar;
+
+
+
+CREATE TABLE kargo_gonderisleri (
+gonderis_id INT PRIMARY KEY , 
+musteri_adi VARCHAR(50), 
+paket_cekisi DECIMAL(10,2)
+);
+
+INSERT INTO kargo_gonderisleri(
+gonderis_id, 
+musteri_adi, 
+paket_cekisi )
+VALUES 
+(1, 'DILARA', 2.589),
+(2, 'LEYLA', 5.1),
+(3, 'NAMIQ', 26.14);
+
+SELECT paket_cekisi 
+CEILING (paket_cekisi) 
+FROM kargo_gonderisleri;
