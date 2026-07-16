@@ -73,7 +73,7 @@ INSERT INTO Satislar (
     vahid_qiymeti, 
     endirim_faizi
 ) VALUES
- (1, 'TELEFON', 2, 1500.00, 0.15),
+ (1, 'TELEFON', 2, 1200.00, 0.15),
  (2, 'LAPTOP',  5, 2000.00, 0.12);
 
 -- 3. Addım: Həm ana məlumatları, həm də ROUND ilə net məbləği hesablayıb gətiririk
