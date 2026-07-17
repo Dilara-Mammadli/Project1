@@ -196,6 +196,23 @@ Ortaya ******** (8 ulduz) simvolunu qoyaraq bu hissələri birləşdir (CONCAT).
 
 Nümunə Nəticə: 4169********7890
 
+CREATE TABLE transactions(transaction_id INT PRIMARY KEY, 
+                          card_number VARCHAR(50));
+INSERT INTO transactions(transaction_id, card_number) VALUES 
+(1, 1645789812324556),
+(2, 4127545698783696);
+SELECT transaction_id, 
+       CONCAT(
+           SUBSTRING(card_number, 1, 4), 
+           '********', 
+           SUBSTRING(card_number, 13, 4)
+       ) AS yeni_kart 
+FROM transactions;
+
+
+
+
+
 🛠️ Tapşırıq 4: Data Keyfiyyətinə Nəzarət (E-mail Validasiyası)
 Ssenari:
 
@@ -210,6 +227,16 @@ Biznes Tələbi:
 E-mail ünvanının uzunluğu (LENGTH) 15 simvoldan kiçik olan istifadəçiləri tap.
 
 E-maillərin böyük-kiçik hərflə yazılmasından asılı olmayaraq, hamısını kiçik hərfə çevirib müqayisə et.
+
+CREATE TABLE users(user_id INT PRIMARY KEY, email VARCHAR(50));
+INSERT INTO users(user_id, email) VALUES (1, 'dilaredilare@laran.az'),(2, 'vusal@laran.az');
+
+SELECT user_id, LOWER(email) AS email 
+FROM users 
+WHERE LEN(email) < 20 AND LOWER(email) LIKE '%@laran.az';
+
+
+
 
 🛠️ Tapşırıq 5: Məhsul Bazası (Kateqoriya Kodunun Çıxarılması)
 Ssenari:
@@ -231,3 +258,14 @@ Biznes Tələbi:
 sku_code daxilindən 5-ci simvoldan başlayaraq 3 simvolu kəsib götür (SUBSTRING).
 
 Yeni sütunu sub_category_id olaraq adlandır.
+
+CREATE TABLE inventory(item_id INT PRIMARY KEY, sku_code VARCHAR(50));
+INSERT INTO inventory(item_id, sku_code) VALUES 
+(1, 'CAT-102-PROD-99'),
+(2, 'CAT-758-PROD-79');
+SELECT item_id, sku_code FROM inventory;
+
+SELECT item_id, SUBSTRING(sku_code,5,3)AS sub_category_id FROM inventory;
+
+
+
