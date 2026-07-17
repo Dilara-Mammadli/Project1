@@ -362,6 +362,42 @@ Stajı 2 ildən az olanlar üçün -> 'Junior Specialist'
 
 İşçilərə veriləcək bonusu hesabla: Əgər kateqoriyası 'Senior Azerbaijani Expert'-dirsə, maaşının 20%-i, digər hallarda isə maaşının 5%-i qədər bonus hesablanmalıdır. (Bu bonusu da bonus_amount olaraq göstər).
 
+CREATE TABLE employees (employee_id INT PRIMARY KEY, 
+                        first_name VARCHAR(50), 
+                        salary DECIMAL(10,2), 
+                        experience_years INT);
+INSERT INTO employees (employee_id, first_name, salary, experience_years) VALUES
+(1, 'DILARA', 500, 5),
+(2, 'LEYLA', 400, 3);
+SELECT employee_id, first_name, salary, experience_years FROM employees;
+
+SELECT employee_id, 
+       first_name, 
+       salary, 
+       experience_years,
+
+       CASE 
+           WHEN experience_years >= 5 THEN 'Senior Azerbaijani Expert'
+           WHEN experience_years BETWEEN 2 AND 4 THEN 'Mid Professional'
+           ELSE 'Junior Specialist'
+       END AS employee_tier,
+       
+       CASE 
+           WHEN experience_years >= 5 THEN salary * 0.20
+           ELSE salary * 0.05
+       END AS bonus_amount
+
+FROM employees;
+
+
+
+
+
+
+
+
+
+
 🛠️ Tapşırıq 4: Fintech / Abunəlik Sistemi (Növbəti Ödəniş Tarixinin Hesablanması)
 Ssenari:
 
