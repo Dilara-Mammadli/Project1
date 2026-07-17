@@ -268,4 +268,130 @@ SELECT item_id, sku_code FROM inventory;
 SELECT item_id, SUBSTRING(sku_code,5,3)AS sub_category_id FROM inventory;
 
 
+17.07.2026
 
+Trading platforması üçün istifadəçilərin etdiyi investisiyaların gəlirlilik faizini (Return on Investment - ROI) hesablayan hesabat hazırlamalısan. Düstur belədir: (qazanc / investisiya_meblegi) * 100. Lakin bəzi istifadəçilərin balansında investisiya məbləği 0 daxil edilib və bu, sistemdə hesablama apararkən sıfıra bölünmə xətası yaradır.
+
+Baza Cədvəli: trading_accounts
+
+Sütunlar: account_id, invested_amount (investisiya məbləği), profit (qazanc)
+
+Biznes Tələbi:
+
+NULLIF funksiyasından istifadə edərək investisiya məbləği 0 olan sətirlərdə sıfıra bölünmə xətasının qarşısını al.
+
+Yaranan gəlirlilik faizini roi_percentage sütunu olaraq çıxar.
+
+CREATE TABLE trading_accounts(account_id INT PRIMARY KEY, invested_amount DECIMAL(18, 2), -- 18 rəqəm ümumi uzunluq, 2 rəqəm vergüldən sonra
+    profit DECIMAL(18, 2));
+INSERT INTO trading_accounts(account_id, invested_amount, profit)  VALUES 
+(1, 2000, 150),
+(2, 15096, 200),
+(3, 0, 150);
+SELECT account_id, invested_amount, profit FROM trading_accounts;
+
+SELECT account_id, invested_amount, profit, ((profit / NULLIF (invested_amount,0)) * 100) 
+AS roi_percentage FROM trading_accounts;
+
+
+
+
+
+Tapşırıq 2: Müştəri Xidmətləri (Əlaqə Vasitələrinin Təmizlənməsi)
+Ssenari:
+
+Müştərilərə mühüm bildiriş göndərmək lazımdır. Bizim əlaqə prioritetimiz belədir:
+
+Əgər müştərinin şəxsi e-maili (personal_email) varsa, ora göndər.
+
+Şəxsi e-maili yoxdursa (NULL-dursa), iş e-mailinə (work_email) göndər.
+
+Heç biri yoxdursa, default olaraq 'no-reply@company.com' ünvanına göndər.
+
+Baza Cədvəli: contacts
+
+Sütunlar: contact_id, personal_email, work_email
+
+Biznes Tələbi:
+
+COALESCE funksiyasını istifadə edərək yuxarıdakı prioritet sırasına uyğun olaraq tək bir e-mail sütunu çıxar.
+
+Yeni sütunun adını notification_email qoy.
+
+CREATE TABLE contacts(contact_id INT PRIMARY KEY, personal_email VARCHAR(50), work_email VARCHAR(50));
+INSERT INTO contacts(contact_id, personal_email, work_email) VALUES 
+(1, 'dilare@mail.ru', 'dilare@laran.az'),
+(2, NULL, 'leyla@laran.az'),
+(3, 'vusal@mail.ru', 'vusal@laran.az'),
+(4, NULL, NULL);
+SELECT contact_id, 
+       COALESCE(personal_email, work_email, 'no-reply@company.com') AS notification_email
+FROM contacts;
+
+SELECT contact_id,
+       CASE 
+           WHEN personal_email IS NOT NULL THEN personal_email
+           WHEN work_email IS NOT NULL THEN work_email
+           ELSE 'no-reply@company.com'
+       END AS notification_email
+FROM contacts;
+
+
+
+
+
+
+🛠️ Tapşırıq 3: HR / Mükafatlandırma (Staja görə Kateqoriya və Bonus təyini)
+Ssenari:
+
+Şirkət rəhbərliyi işçilərin işə başlama tarixinə (stajına) görə kateqoriyalar müəyyən etmək və onlara bonus vermək istəyir.
+
+Baza Cədvəli: employees
+
+Sütunlar: employee_id, first_name, salary (əməkhaqqı), experience_years (iş stajı ili)
+
+Biznes Tələbi:
+
+CASE operatorundan istifadə edərək yeni employee_tier sütunu yarat:
+
+Stajı 5 ildən çox olanlar üçün -> 'Senior Azerbaijani Expert'
+
+Stajı 2 ilə 5 il arasında olanlar üçün -> 'Mid Professional'
+
+Stajı 2 ildən az olanlar üçün -> 'Junior Specialist'
+
+İşçilərə veriləcək bonusu hesabla: Əgər kateqoriyası 'Senior Azerbaijani Expert'-dirsə, maaşının 20%-i, digər hallarda isə maaşının 5%-i qədər bonus hesablanmalıdır. (Bu bonusu da bonus_amount olaraq göstər).
+
+🛠️ Tapşırıq 4: Fintech / Abunəlik Sistemi (Növbəti Ödəniş Tarixinin Hesablanması)
+Ssenari:
+
+İstifadəçilərin aylıq və illik abunəlik tarixlərini idarə edən sistem qurmalısan. Müştərinin abunə olduğu tarix və abunəlik tipi (Aylıq / İllik) bizə məlumdur.
+
+Baza Cədvəli: subscriptions
+
+Sütunlar: subscription_id, start_date (abunəlik başlama tarixi - DATE tipində), plan_type (abunəlik növü: 'Monthly' və ya 'Yearly')
+
+Biznes Tələbi (SQL Server - DATEADD və CASE birlikdə):
+
+Əgər plan_type dəyəri 'Monthly'-dirsə, start_date üzərinə 1 ay əlavə et.
+
+Əgər plan_type dəyəri 'Yearly'-dirsə, start_date üzərinə 1 il əlavə et.
+
+Nəticə sütununu next_payment_date olaraq adlandır.
+
+🛠️ Tapşırıq 5: Satış Analitikası (Həftəsonu və Həftəiçi Satışlarının Analizi)
+Ssenari:
+
+Mağazanın satışlarının hansı hissəsinin həftəiçi, hansı hissəsinin isə həftəsonu reallaşdığını analiz etmək lazımdır. SQL Server-də DATEPART(weekday, tarix) bizə həftənin gününü rəqəm olaraq qaytarır (Məsələn: 1 = Bazar, 7 = Şənbə, digər rəqəmlər isə həftəiçi günlərdir).
+
+Baza Cədvəli: sales
+
+Sütunlar: sale_id, sale_amount, sale_date (DATETIME tipində)
+
+Biznes Tələbi (SQL Server - DATEPART və CASE birlikdə):
+
+DATEPART vasitəsilə satış tarixinin həftənin hansı günü olduğunu tap.
+
+CASE vasitəsilə: Əgər gün 1 (Bazar) və ya 7 (Şənbə)-dirsə, 'Weekend' (Həftəsonu), digər günlərdirsə 'Weekday' (Həftəiçi) yazdır.
+
+Yeni sütunun adını day_type qoy.
