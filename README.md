@@ -394,10 +394,6 @@ FROM employees;
 
 
 
-
-
-
-
 🛠️ Tapşırıq 4: Fintech / Abunəlik Sistemi (Növbəti Ödəniş Tarixinin Hesablanması)
 Ssenari:
 
